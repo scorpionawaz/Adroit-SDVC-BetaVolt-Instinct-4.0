@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import type { Role } from "./main-client";
 import { DashboardClient } from "./dashboard-client";
@@ -54,16 +55,29 @@ const typeColors: Record<string, string> = {
 };
 
 const consumerTabs = [
-  { id: "my-home", label: "My Home", icon: Home },
-  { id: "billing", label: "Billing", icon: CreditCard },
-  { id: "analytics", label: "Analytics", icon: BarChart2 },
-  { id: "support", label: "Support", icon: LifeBuoy },
-  { id: "profile", label: "Profile", icon: User },
-  { id: "settings", label: "Settings", icon: Settings },
+  { id: "my-home", label: "My Home", icon: Home, path: "/" },
+  { id: "billing", label: "Billing", icon: CreditCard, path: "/billing" },
+  { id: "analytics", label: "Analytics", icon: BarChart2, path: "/analytics" },
+  { id: "support", label: "Support", icon: LifeBuoy, path: "/support" },
+  { id: "profile", label: "Profile", icon: User, path: "/profile" },
+  { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
 ];
 
 export function AppShell({ role, onLogout }: AppShellProps) {
-  const [activeTab, setActiveTab] = useState("my-home");
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Derive active tab from current URL
+  const activeTab = (() => {
+    const match = consumerTabs.find(t => t.path === pathname);
+    return match ? match.id : "my-home";
+  })();
+
+  const navigateTo = (tabId: string) => {
+    const tab = consumerTabs.find(t => t.id === tabId);
+    if (tab) router.push(tab.path);
+  };
+
   const [notifs, setNotifs] = useState<Notif[]>(initialNotifs);
   const [notifOpen, setNotifOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -93,6 +107,7 @@ export function AppShell({ role, onLogout }: AppShellProps) {
       default: return <DashboardClient />;
     }
   };
+
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -142,7 +157,7 @@ export function AppShell({ role, onLogout }: AppShellProps) {
                 const navButton = (
                   <button
                     key={tab.id}
-                    onClick={() => { setActiveTab(tab.id); if (window.innerWidth < 1024) setSidebarOpen(false); }}
+                    onClick={() => { navigateTo(tab.id); if (window.innerWidth < 1024) setSidebarOpen(false); }}
                     className={cn(
                       "w-full flex items-center gap-3 rounded-lg transition-all duration-200 group relative",
                       sidebarCollapsed ? "lg:justify-center lg:px-0 px-3.5 py-2.5" : "px-3.5 py-2.5",
@@ -181,10 +196,10 @@ export function AppShell({ role, onLogout }: AppShellProps) {
           <div className={cn("px-2.5 py-3 border-t border-slate-800/60")}>
             <div className={cn("flex items-center gap-3 px-3 py-2 mb-1", sidebarCollapsed && "lg:justify-center lg:px-0")}>
               <Avatar className="h-8 w-8 flex-shrink-0">
-                <AvatarFallback className="bg-emerald-600 text-white text-xs font-bold">AK</AvatarFallback>
+                <AvatarFallback className="bg-emerald-600 text-white text-xs font-bold">AB</AvatarFallback>
               </Avatar>
               <div className={cn("flex-1 min-w-0 transition-opacity duration-200", sidebarCollapsed && "lg:hidden")}>
-                <p className="text-sm font-medium text-slate-200 truncate">Ajmeri Khatun</p>
+                <p className="text-sm font-medium text-slate-200 truncate">Akshay Bhatia</p>
                 <p className="text-[10px] text-slate-500 truncate">Consumer</p>
               </div>
             </div>
@@ -313,24 +328,24 @@ export function AppShell({ role, onLogout }: AppShellProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Avatar className="h-9 w-9 cursor-pointer hover:ring-2 hover:ring-emerald-500/30 transition-all duration-200">
-                    <AvatarFallback className="bg-emerald-600 text-white text-sm font-bold">AK</AvatarFallback>
+                    <AvatarFallback className="bg-emerald-600 text-white text-sm font-bold">AB</AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-[200px] mt-1 p-2 rounded-xl">
                   <DropdownMenuLabel className="font-bold flex flex-col gap-1">
-                    <span>Ajmeri Khatun</span>
+                    <span>Akshay Bhatia</span>
                     <span className="text-xs text-slate-500 font-normal">Consumer</span>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setActiveTab("profile")} className="cursor-pointer gap-3 rounded-lg py-2 my-0.5">
+                  <DropdownMenuItem onClick={() => navigateTo("profile")} className="cursor-pointer gap-3 rounded-lg py-2 my-0.5">
                     <User className="h-4 w-4 text-slate-500" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setActiveTab("settings")} className="cursor-pointer gap-3 rounded-lg py-2 my-0.5">
+                  <DropdownMenuItem onClick={() => navigateTo("settings")} className="cursor-pointer gap-3 rounded-lg py-2 my-0.5">
                     <Settings className="h-4 w-4 text-slate-500" />
                     <span>Settings</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setActiveTab("settings")} className="cursor-pointer gap-3 rounded-lg py-2 my-0.5">
+                  <DropdownMenuItem onClick={() => navigateTo("analytics")} className="cursor-pointer gap-3 rounded-lg py-2 my-0.5">
                     <Zap className="h-4 w-4 text-slate-500" />
                     <span>My Patterns</span>
                   </DropdownMenuItem>

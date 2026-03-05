@@ -67,6 +67,15 @@
   }
 }
 
+/* Hide scrollbars completely across the app */
+::-webkit-scrollbar {
+  display: none !important;
+}
+* {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
 /* Agent Mode orbit ring + label animations */
 @keyframes agentPing {
   0%   { transform: translate(-50%, -50%) scale(0.85); opacity: 0.6; }

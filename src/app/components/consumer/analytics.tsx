@@ -60,7 +60,7 @@ const defaultRoutines: Routine[] = [
 ];
 
 const defaultMembers: Member[] = [
-  { id: "m1", name: "Ajmeri Khatun", relation: "Primary Account Holder", email: "ajmeri.k@betavolt.com" },
+  { id: "m1", name: "Akshay Bhatia", relation: "Primary Account Holder", email: "akshay.b@betavolt.com" },
   { id: "m2", name: "Rashid Khatun", relation: "Spouse", email: "rashid.k@example.com" },
 ];
 

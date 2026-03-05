@@ -25,7 +25,7 @@ const billData = {
   dueDate: "15 Feb 2026",
   billMonth: "January 2026",
   consumer: {
-    name: "Ajmeri Khatun",
+    name: "Akshay Bhatia",
     id: "#M-992104",
     address: "Flat 4B, Sunrise Heights, MIDC, Nagpur – 440018",
     phone: "+91 98765 43210",

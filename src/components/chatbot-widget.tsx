@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
 // --- CONFIGURATION ---
-const WS_URL = "ws://10.10.11.89:8080/lovelocalai/";
+const WS_URL = "ws://10.10.12.174:8080/BetaVoltHome/";
 const USER_AUDIO_SAMPLE_RATE = 16000;
 const AI_SAMPLE_RATE = 24000;
 

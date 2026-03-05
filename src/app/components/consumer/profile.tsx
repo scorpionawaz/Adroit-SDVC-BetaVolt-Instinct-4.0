@@ -44,7 +44,7 @@ export function ConsumerProfile() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs text-muted-foreground uppercase">Full Name</Label>
-                <p className="font-medium">Ajmeri Khatun</p>
+                <p className="font-medium">Akshay Bhatia</p>
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground uppercase">Consumer ID</Label>
@@ -52,7 +52,7 @@ export function ConsumerProfile() {
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground uppercase">Email</Label>
-                <p className="font-medium">ajmeri.k@example.com</p>
+                <p className="font-medium">akshay.b@example.com</p>
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground uppercase">Phone</Label>

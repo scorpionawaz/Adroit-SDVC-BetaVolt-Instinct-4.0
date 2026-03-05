@@ -40,6 +40,10 @@ export default function IntellismartMasterDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [consumerData, setConsumerData] = useState<any>(null);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [tariffRate, setTariffRate] = useState("");
+  const [tariffReason, setTariffReason] = useState("");
+  const [tariffUser, setTariffUser] = useState("admin");
+  const [tariffStatus, setTariffStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   useEffect(() => {
     const stored = localStorage.getItem("instinct_user_role");
@@ -505,8 +509,100 @@ export default function IntellismartMasterDashboard() {
     </div>
   );
 
-  const renderTariffs = () => (
+  const renderTariffs = () => {
+    const handleSetTariff = async () => {
+      const rate = parseFloat(tariffRate);
+      if (!tariffRate || isNaN(rate) || !tariffReason.trim()) return;
+      setTariffStatus("loading");
+      try {
+        const res = await fetch("http://10.10.12.174:8080/tariff", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rate, reason: tariffReason, user: tariffUser }),
+        });
+        if (!res.ok) {
+          const errMsg = await res.text();
+          throw new Error(errMsg || "Server rejected the request");
+        }
+        setTariffStatus("success");
+        setTimeout(() => setTariffStatus("idle"), 3000);
+      } catch (e) {
+        console.error("Tariff update failed:", e);
+        setTariffStatus("error");
+        setTimeout(() => setTariffStatus("idle"), 3000);
+      }
+    };
+
+    return (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">
+
+      {/* Set Current Live Tariff */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="flex justify-between items-center mb-5">
+          <div>
+            <h3 className="text-xl font-bold text-slate-800">Set Current Live Tariff</h3>
+            <p className="text-sm text-slate-500">Override the real-time tariff rate pushed to all consumer agents instantly.</p>
+          </div>
+          {tariffStatus === "success" && (
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Tariff Updated Successfully
+            </span>
+          )}
+          {tariffStatus === "error" && (
+            <span className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5" /> Failed — Check Connection
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Rate (₹ per kWh)</label>
+            <input
+              type="number"
+              step="0.1"
+              placeholder="e.g. 8.50"
+              value={tariffRate}
+              onChange={(e) => setTariffRate(e.target.value)}
+              className="w-full mt-1.5 border border-slate-300 rounded-lg p-2.5 text-sm outline-none font-mono focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Reason / Justification</label>
+            <input
+              type="text"
+              placeholder="e.g. Peak demand surge"
+              value={tariffReason}
+              onChange={(e) => setTariffReason(e.target.value)}
+              className="w-full mt-1.5 border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Authorized By</label>
+            <input
+              type="text"
+              placeholder="admin"
+              value={tariffUser}
+              onChange={(e) => setTariffUser(e.target.value)}
+              className="w-full mt-1.5 border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
+            />
+          </div>
+        </div>
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={handleSetTariff}
+            disabled={tariffStatus === "loading" || !tariffRate || !tariffReason}
+            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg font-bold shadow transition flex items-center gap-2"
+          >
+            {tariffStatus === "loading" ? (
+              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Pushing...</>
+            ) : (
+              <><Zap className="w-4 h-4" /> Set Tariff</>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Existing TOU Pricing */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -541,7 +637,7 @@ export default function IntellismartMasterDashboard() {
         </div>
       </div>
     </div>
-  );
+  );};
 
   const renderAgent = () => (
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">

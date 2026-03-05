@@ -84,30 +84,30 @@ export const initialDevices: Device[] = [
     usageHoursToday: 0.8,
     status: 'off',
   },
-  {
-    id: 'router-1',
-    name: 'Wi-Fi Router',
-    icon: Wind,
-    powerConsumption: 15,
-    usageHoursToday: 24,
-    status: 'on',
-  },
-  {
-    id: 'exhaust-1',
-    name: 'Exhaust Fan',
-    icon: Wind,
-    powerConsumption: 45,
-    usageHoursToday: 2.0,
-    status: 'on',
-  },
-  {
-    id: 'desktop-1',
-    name: 'Desktop PC',
-    icon: Microwave,
-    powerConsumption: 0,
-    usageHoursToday: 0,
-    status: 'off',
-  }
+  // {
+  //   id: 'router-1',
+  //   name: 'Wi-Fi Router',
+  //   icon: Wind,
+  //   powerConsumption: 15,
+  //   usageHoursToday: 24,
+  //   status: 'on',
+  // },
+  // {
+  //   id: 'exhaust-1',
+  //   name: 'Exhaust Fan',
+  //   icon: Wind,
+  //   powerConsumption: 45,
+  //   usageHoursToday: 2.0,
+  //   status: 'on',
+  // },
+  // {
+  //   id: 'desktop-1',
+  //   name: 'Desktop PC',
+  //   icon: Microwave,
+  //   powerConsumption: 0,
+  //   usageHoursToday: 0,
+  //   status: 'off',
+  // }
 ];
 export const puneTariffs: Tariff = {
   high: 11.82, // Sample peak rate in ₹/kWh

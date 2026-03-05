@@ -24,7 +24,7 @@ import {
   AirVent, Lightbulb, WashingMachine, Wind, BatteryCharging, Refrigerator, Microwave,
   Tv, Plus, Trash2, AlertTriangle, TrendingUp, Zap, BrainCircuit, Leaf,
   Sun, Moon, Clock, DollarSign, ArrowUpRight, ArrowDownRight, Receipt, Bot, Sparkles,
-  ChevronLeft, ChevronRight, Activity
+  Activity, LucideIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +32,7 @@ const ALL_DEVICE_ICONS: Record<string, React.ElementType> = {
   AirVent, Lightbulb, WashingMachine, Wind, BatteryCharging, Refrigerator, Microwave, Tv, Zap
 };
 
-const DEVICES_PER_PAGE = 8;
+
 
 // ── Device Card ──
 function DeviceCard({
@@ -49,32 +49,62 @@ function DeviceCard({
   const watts = device.powerConsumption;
   const tier = !isOn ? "off" : watts > 1000 ? "high" : watts > 200 ? "medium" : "low";
 
-  const tierConfig: Record<string, { borderColor: string; iconBg: string; label: string; badgeVariant: "destructive" | "secondary" | "default" | "outline" }> = {
-    off: { borderColor: "border-slate-300 dark:border-slate-800", iconBg: "bg-slate-300 dark:bg-slate-800/80", label: "Off", badgeVariant: "secondary" },
-    low: { borderColor: "border-emerald-400 dark:border-emerald-600", iconBg: "bg-emerald-200 dark:bg-emerald-900/40", label: "Low", badgeVariant: "default" },
-    medium: { borderColor: "border-violet-400 dark:border-violet-600", iconBg: "bg-violet-200 dark:bg-violet-900/40", label: "Medium", badgeVariant: "outline" },
-    high: { borderColor: "border-red-400 dark:border-red-600", iconBg: "bg-red-200 dark:bg-red-900/40", label: "High", badgeVariant: "destructive" },
+  const tierConfig: Record<string, { borderColor: string; iconBg: string; textMain: string; textMuted: string; cardBg: string; label: string; badgeVariant: "destructive" | "secondary" | "default" | "outline" }> = {
+    off: { 
+      borderColor: "border-slate-200 dark:border-slate-800", 
+      iconBg: "bg-slate-100 dark:bg-slate-900", 
+      cardBg: "bg-slate-50 dark:bg-slate-900/50",
+      textMain: "text-slate-400 dark:text-slate-600",
+      textMuted: "text-slate-400 dark:text-slate-700",
+      label: "Off", 
+      badgeVariant: "secondary" 
+    },
+    low: { 
+      borderColor: "border-emerald-600", 
+      iconBg: "bg-emerald-500/20", 
+      cardBg: "bg-emerald-600 dark:bg-emerald-700",
+      textMain: "text-white",
+      textMuted: "text-emerald-50",
+      label: "Low", 
+      badgeVariant: "default" 
+    },
+    medium: { 
+      borderColor: "border-violet-600", 
+      iconBg: "bg-violet-500/20", 
+      cardBg: "bg-violet-600 dark:bg-violet-700",
+      textMain: "text-white",
+      textMuted: "text-violet-50",
+      label: "Medium", 
+      badgeVariant: "outline" 
+    },
+    high: { 
+      borderColor: "border-red-600", 
+      iconBg: "bg-red-500/20", 
+      cardBg: "bg-red-600 dark:bg-red-700",
+      textMain: "text-white",
+      textMuted: "text-red-50",
+      label: "High", 
+      badgeVariant: "destructive" 
+    },
   };
   const s = tierConfig[tier];
 
   return (
     <Card className={cn(
-      "relative transition-all duration-500 ease-out border-2 overflow-hidden group bg-white dark:bg-[#030712]",
-      "shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] hover:-translate-y-2 hover:rounded-br-[40px] hover:rounded-tl-[40px]",
-      s.borderColor
+      "relative transition-all duration-300 ease-in-out border-2 overflow-hidden",
+      "shadow-md group",
+      s.borderColor,
+      s.cardBg
     )}>
-      {/* Water drop (ripple) expand effect */}
-      <span className="absolute inset-0 bg-white/20 dark:bg-white/5 scale-0 opacity-0 group-hover:scale-150 group-hover:opacity-100 rounded-full transition-all duration-700 ease-out pointer-events-none origin-center" />
-      
-      <CardHeader className="pb-2 pt-4 px-4 relative z-10">
+      <CardHeader className="pb-1 pt-2.5 px-3 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className={cn("p-2 rounded-xl transition-colors duration-200", s.iconBg)}>
-              <Icon className="h-4 w-4 text-slate-700 dark:text-slate-200" />
+          <div className="flex items-center gap-2">
+            <div className={cn("p-1.5 rounded-lg transition-colors duration-200", s.iconBg)}>
+              <Icon className={cn("h-3.5 w-3.5", !isOn ? "text-slate-400 dark:text-slate-600" : "text-white")} />
             </div>
             <div>
-              <CardTitle className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">{device.name}</CardTitle>
-              <Badge variant={s.badgeVariant} className="mt-1 text-[10px] h-5 font-bold uppercase tracking-wider">
+              <CardTitle className={cn("text-xs font-bold leading-tight", s.textMain)}>{device.name}</CardTitle>
+              <Badge variant={s.badgeVariant} className={cn("mt-0.5 text-[9px] h-4 px-1.5 font-bold uppercase tracking-wider", !isOn && "opacity-50")}>
                 {s.label}
               </Badge>
             </div>
@@ -82,38 +112,37 @@ function DeviceCard({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-slate-400 hover:text-red-500"
+            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-slate-400 hover:text-red-500"
             onClick={() => onRemove(device.id)}
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       </CardHeader>
 
-      <CardContent className="px-4 pb-4 space-y-3">
+      <CardContent className="px-3 pb-2.5 space-y-1.5">
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Power Draw</p>
-            <p className="text-2xl font-black font-mono text-slate-900 dark:text-white tabular-nums">{watts}<span className="text-xs font-medium ml-0.5 text-slate-500">W</span></p>
+            <p className={cn("text-[9px] font-bold uppercase tracking-wider", s.textMuted)}>Power</p>
+            <p className={cn("text-lg font-black font-mono tabular-nums leading-none", s.textMain)}>{watts}<span className={cn("text-[10px] font-medium ml-0.5", s.textMuted)}>W</span></p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Hours Today</p>
-            <p className="text-lg font-bold font-mono text-slate-700 dark:text-slate-200 tabular-nums">{device.usageHoursToday.toFixed(1)}<span className="text-xs font-medium ml-0.5 text-slate-500">h</span></p>
+            <p className={cn("text-[9px] font-bold uppercase tracking-wider", s.textMuted)}>Today</p>
+            <p className={cn("text-sm font-bold font-mono tabular-nums leading-none", s.textMain)}>{device.usageHoursToday.toFixed(1)}<span className={cn("text-[10px] font-medium ml-0.5", s.textMuted)}>h</span></p>
           </div>
         </div>
 
-        {/* Usage bar removed by request */}
         {analysisResult?.isUnusual && isOn && (
-          <div className="flex items-start gap-1.5 bg-violet-200/60 dark:bg-violet-900/20 border border-violet-400 dark:border-violet-700 rounded-lg p-2.5 text-xs text-violet-900 dark:text-violet-200 animate-in slide-in-from-top-1 duration-300">
-            <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-            <p className="leading-snug"><strong>AI Alert:</strong> {analysisResult.reason}</p>
+          <div className="flex items-start gap-1 bg-violet-200/60 dark:bg-violet-900/20 border border-violet-400 dark:border-violet-700 rounded p-1.5 text-[10px] text-violet-900 dark:text-violet-200 animate-in slide-in-from-top-1 duration-300">
+            <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
+            <p className="leading-snug"><strong>AI:</strong> {analysisResult.reason}</p>
           </div>
         )}
 
-        <Separator />
+        <Separator className={cn(isOn ? "bg-white/20" : "bg-slate-200 dark:bg-slate-700")} />
 
         <div className="flex items-center justify-between">
-          <Label htmlFor={`sw-${device.id}`} className="text-xs font-bold cursor-pointer text-slate-600 dark:text-slate-300">{isOn ? "Turn Off" : "Turn On"}</Label>
+          <Label htmlFor={`sw-${device.id}`} className={cn("text-[10px] font-bold cursor-pointer", s.textMain)}>{isOn ? "Turn Off" : "Turn On"}</Label>
           <Switch id={`sw-${device.id}`} checked={isOn} onCheckedChange={(c) => onToggle(device.id, c)} />
         </div>
       </CardContent>
@@ -129,7 +158,7 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
   const [analysis, setAnalysis] = useState<AnalyzeConsumptionPatternsOutput | null>(null);
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   const [powerSavingMode, setPowerSavingMode] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+
   const { toast } = useToast();
 
   const handleAgentModeOpen = useCallback(() => {
@@ -146,6 +175,8 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
   const [newName, setNewName] = useState("");
   const [newWatts, setNewWatts] = useState("100");
   const [newIconKey, setNewIconKey] = useState("Zap");
+
+  // No sticky order ref — device positions are fixed by insertion order only
 
   const alertSentRef = useRef(false);
   const wsSendRef = useRef<((msg: string) => boolean) | null>(null);
@@ -177,12 +208,13 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
 
   const handleAddDevice = () => {
     if (!newName.trim()) return;
-    const IconComp = ALL_DEVICE_ICONS[newIconKey] || Zap;
+    const IconComp = (ALL_DEVICE_ICONS[newIconKey] || Zap) as LucideIcon;
     const w = parseInt(newWatts) || 100;
+    const newId = `custom-${Date.now()}`;
     setDevices(prev => [...prev, {
-      id: `custom-${Date.now()}`, name: newName, icon: IconComp,
+      id: newId, name: newName, icon: IconComp,
       powerConsumption: w, usageHoursToday: 0, status: "off",
-    }]);
+    }] as Device[]);
     setNewName(""); setNewWatts("100"); setAddOpen(false);
     toast({ title: "Device added!", description: `${newName} has been added to your home.` });
   };
@@ -203,7 +235,6 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
 
   const totalUsageKWh = useMemo(() =>
     devices.reduce((t, d) => t + (d.powerConsumption * d.usageHoursToday) / 1000, 0), [devices]);
-
   const dynamicTariffRate = useMemo(() => {
     const activeCount = devices.filter(d => d.status === "on").length;
     const surcharge = Math.max(0, activeCount - 2) * 0.4;
@@ -230,21 +261,9 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
   const hour = new Date().getHours();
   const isHighTariff = hour >= 9 && hour < 21;
 
-  // Pagination and Sorting
-  const sortedDevices = useMemo(() => {
-    return [...devices].sort((a, b) => {
-      if (a.status === "on" && b.status !== "on") return -1;
-      if (a.status !== "on" && b.status === "on") return 1;
-      return 0;
-    });
-  }, [devices]);
+  // Devices keep insertion order — no reordering on status change, all shown at once
 
-  const totalPages = Math.max(1, Math.ceil(sortedDevices.length / DEVICES_PER_PAGE));
-  const paginatedDevices = sortedDevices.slice((currentPage - 1) * DEVICES_PER_PAGE, currentPage * DEVICES_PER_PAGE);
 
-  useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
-  }, [devices.length, totalPages, currentPage]);
 
   useEffect(() => {
     if (dynamicTariffRate >= TARIFF_ALERT_THRESHOLD && !alertSentRef.current) {
@@ -289,42 +308,42 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
       <div className="max-w-[1400px] mx-auto space-y-6">
 
         {/* ── ROW 1: Stat Cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Usage */}
           <Card className="shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-shadow duration-300 border-slate-200 dark:border-slate-700 dark:bg-slate-800">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4 sm:px-5">
-              <p className="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-wider">Usage Today</p>
-              <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-4">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Usage Today</p>
+              <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
+                <Zap className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
               </div>
             </CardHeader>
-            <CardContent className="px-4 sm:px-5 pb-4">
-              <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono tabular-nums">{totalUsageKWh.toFixed(2)} <span className="text-sm font-normal text-slate-500">kWh</span></p>
-              <p className="text-[10px] sm:text-xs mt-1 text-slate-500">≈ ₹{estimatedCost.toFixed(0)}</p>
+            <CardContent className="px-4 pb-3">
+              <p className="text-xl font-black text-slate-900 dark:text-white font-mono tabular-nums">{totalUsageKWh.toFixed(2)} <span className="text-xs font-normal text-slate-500">kWh</span></p>
+              <p className="text-[10px] mt-0.5 text-slate-500">≈ ₹{estimatedCost.toFixed(0)}</p>
             </CardContent>
           </Card>
 
           {/* Tariff — COLOR CODED */}
           <Card className={cn("shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all duration-300 border-2", tariffBg)}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4 sm:px-5">
-              <p className="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-4">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
                 Live Tariff
                 <span className="relative flex h-2 w-2">
                   <span className={cn("animate-ping absolute h-full w-full rounded-full opacity-75", isAlertLevel ? "bg-red-400" : "bg-emerald-400")} />
                   <span className={cn("relative rounded-full h-2 w-2", isAlertLevel ? "bg-red-500" : "bg-emerald-500")} />
                 </span>
               </p>
-              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", isAlertLevel ? "bg-red-100 dark:bg-red-900" : "bg-orange-100 dark:bg-orange-900")}>
-                {isHighTariff ? <Sun className={cn("h-4 w-4", isAlertLevel ? "text-red-600" : "text-orange-600")} /> : <Moon className="h-4 w-4 text-slate-500" />}
+              <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", isAlertLevel ? "bg-red-100 dark:bg-red-900" : "bg-orange-100 dark:bg-orange-900")}>
+                {isHighTariff ? <Sun className={cn("h-3.5 w-3.5", isAlertLevel ? "text-red-600" : "text-orange-600")} /> : <Moon className="h-3.5 w-3.5 text-slate-500" />}
               </div>
             </CardHeader>
-            <CardContent className="px-4 sm:px-5 pb-4">
-              <p className={cn("text-xl sm:text-2xl font-black font-mono tabular-nums transition-colors duration-500", tariffColor)}>
-                ₹{dynamicTariffRate.toFixed(2)}<span className="text-sm font-normal text-slate-500">/kWh</span>
+            <CardContent className="px-4 pb-3">
+              <p className={cn("text-xl font-black font-mono tabular-nums transition-colors duration-500", tariffColor)}>
+                ₹{dynamicTariffRate.toFixed(2)}<span className="text-xs font-normal text-slate-500">/kWh</span>
               </p>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-0.5">
                 {isAlertLevel && <Badge variant="destructive" className="text-[9px] h-4 animate-pulse">HIGH ALERT</Badge>}
-                <p className={cn("text-[10px] sm:text-xs font-bold", isHighTariff ? "text-orange-500" : "text-emerald-600")}>
+                <p className={cn("text-[10px] font-bold", isHighTariff ? "text-orange-500" : "text-emerald-600")}>
                   {isHighTariff ? "Peak 9AM–9PM" : "Off-Peak"}
                 </p>
               </div>
@@ -334,101 +353,33 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
 
           {/* Predicted */}
           <Card className="bg-slate-900 border-slate-800 text-white shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-shadow duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4 sm:px-5">
-              <p className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-wider">Predicted Today</p>
-              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
-                <BrainCircuit className="h-4 w-4 text-emerald-400" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-4">
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Predicted Today</p>
+              <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
+                <BrainCircuit className="h-3.5 w-3.5 text-emerald-400" />
               </div>
             </CardHeader>
-            <CardContent className="px-4 sm:px-5 pb-4">
-              <p className="text-xl sm:text-2xl font-black font-mono text-emerald-400 tabular-nums">{predictedKWh.toFixed(1)} <span className="text-sm font-normal text-slate-400">kWh</span></p>
-              <p className="text-[10px] sm:text-xs mt-1 text-slate-500">≈ ₹{predictedCost.toFixed(0)}</p>
+            <CardContent className="px-4 pb-3">
+              <p className="text-xl font-black font-mono text-emerald-400 tabular-nums">{predictedKWh.toFixed(1)} <span className="text-xs font-normal text-slate-400">kWh</span></p>
+              <p className="text-[10px] mt-0.5 text-slate-500">≈ ₹{predictedCost.toFixed(0)}</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* ── ROW 2: Devices with Pagination ── */}
+        {/* ── ROW 2: Devices ── */}
         <Card className="border-slate-200 dark:border-slate-700 dark:bg-slate-800 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
-          {/* Header */}
-          <CardHeader className="px-4 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div>
-              <CardTitle className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">My Devices</CardTitle>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {devices.length} devices • {activeDevices.length} active
-              </p>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Legend */}
-              <div className="hidden lg:flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-600" />Low</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-600" />Med</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-600" />High</span>
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-400" />Off</span>
-              </div>
-
-              {/* Power Saving */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={powerSavingMode ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handlePowerSavingToggle(!powerSavingMode)}
-                    className={cn("text-xs gap-1.5 h-9", powerSavingMode && "bg-emerald-600 hover:bg-emerald-700")}
-                  >
-                    <Leaf className="h-3.5 w-3.5" />
-                    {powerSavingMode ? "Saving On" : "Power Save"}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Turn off all devices drawing &gt;500W</TooltipContent>
-              </Tooltip>
-
-              {/* Agent Mode Trigger */}
-              <Button
-                size="sm"
-                className="text-xs gap-1.5 h-9 bg-violet-600 hover:bg-violet-700 text-white shadow-[0_5px_15px_-3px_rgba(139,92,246,0.4)] transition-all hover:-translate-y-0.5"
-                onClick={handleAgentModeOpen}
-              >
-                <Sparkles className="h-3.5 w-3.5" />Agent Mode
-              </Button>
-
-              {/* Add Device */}
-              <Dialog open={addOpen} onOpenChange={setAddOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" className="text-xs gap-1.5 h-9 bg-slate-900 hover:bg-slate-800">
-                    <Plus className="h-3.5 w-3.5" />Add Device
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle>Add a Device</DialogTitle></DialogHeader>
-                  <div className="space-y-4 py-2">
-                    <div>
-                      <Label>Device Name</Label>
-                      <Input className="mt-1.5" placeholder="e.g. Bedroom AC" value={newName} onChange={e => setNewName(e.target.value)} />
-                    </div>
-                    <div>
-                      <Label>Power Consumption (Watts)</Label>
-                      <Input type="number" className="mt-1.5" placeholder="100" value={newWatts} onChange={e => setNewWatts(e.target.value)} />
-                    </div>
-                    <div>
-                      <Label>Icon</Label>
-                      <Select value={newIconKey} onValueChange={setNewIconKey}>
-                        <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {Object.keys(ALL_DEVICE_ICONS).map(k => <SelectItem key={k} value={k}>{k}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button className="w-full bg-slate-900 hover:bg-slate-800" onClick={handleAddDevice}>Add Device</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
+          {/* Header — title only */}
+          <CardHeader className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+            <CardTitle className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">My Devices</CardTitle>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {devices.length} devices • {activeDevices.length} active
+            </p>
           </CardHeader>
 
           {/* Grid */}
-          <CardContent className="p-4 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {paginatedDevices.map(device => (
+          <CardContent className="p-3 sm:p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5">
+              {devices.map(device => (
                 <DeviceCard
                   key={device.id}
                   device={device}
@@ -440,42 +391,75 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
               ))}
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-1.5 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <Button
-                    key={page}
-                    variant={page === currentPage ? "default" : "outline"}
-                    size="icon"
-                    className={cn("h-8 w-8 text-xs font-bold", page === currentPage && "bg-slate-900 hover:bg-slate-800")}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </Button>
-                ))}
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+            {/* ── Controls Footer ── */}
+            <div className="flex items-center justify-between flex-wrap gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
+              {/* Legend */}
+              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50 dark:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-600" />Low</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-600" />Med</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-600" />High</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-400" />Off</span>
               </div>
-            )}
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Power Saving */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={powerSavingMode ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePowerSavingToggle(!powerSavingMode)}
+                      className={cn("text-xs gap-1.5 h-9", powerSavingMode && "bg-emerald-600 hover:bg-emerald-700")}
+                    >
+                      <Leaf className="h-3.5 w-3.5" />
+                      {powerSavingMode ? "Saving On" : "Power Save"}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Turn off all devices drawing &gt;500W</TooltipContent>
+                </Tooltip>
+
+                {/* Agent Mode Trigger */}
+                <Button
+                  size="sm"
+                  className="text-xs gap-1.5 h-9 bg-violet-600 hover:bg-violet-700 text-white shadow-[0_5px_15px_-3px_rgba(139,92,246,0.4)] transition-all hover:-translate-y-0.5"
+                  onClick={handleAgentModeOpen}
+                >
+                  <Sparkles className="h-3.5 w-3.5" />Agent Mode
+                </Button>
+
+                {/* Add Device */}
+                <Dialog open={addOpen} onOpenChange={setAddOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="text-xs gap-1.5 h-9 bg-slate-900 hover:bg-slate-800">
+                      <Plus className="h-3.5 w-3.5" />Add Device
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Add a Device</DialogTitle></DialogHeader>
+                    <div className="space-y-4 py-2">
+                      <div>
+                        <Label>Device Name</Label>
+                        <Input className="mt-1.5" placeholder="e.g. Bedroom AC" value={newName} onChange={e => setNewName(e.target.value)} />
+                      </div>
+                      <div>
+                        <Label>Power Consumption (Watts)</Label>
+                        <Input type="number" className="mt-1.5" placeholder="100" value={newWatts} onChange={e => setNewWatts(e.target.value)} />
+                      </div>
+                      <div>
+                        <Label>Icon</Label>
+                        <Select value={newIconKey} onValueChange={setNewIconKey}>
+                          <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {Object.keys(ALL_DEVICE_ICONS).map(k => <SelectItem key={k} value={k}>{k}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button className="w-full bg-slate-900 hover:bg-slate-800" onClick={handleAddDevice}>Add Device</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
           </CardContent>
         </Card>
 

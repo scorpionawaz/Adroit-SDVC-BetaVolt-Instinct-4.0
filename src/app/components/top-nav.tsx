@@ -183,8 +183,8 @@ export function TopNav({ role, activeTab, onTabChange, onLogout }: TopNavProps) 
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
-              <p className="text-sm font-medium">{role === "consumer" ? "Ajmeri Khatun" : "Admin User"}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{role === "consumer" ? "ajmeri.k@betavolt.com" : "admin@betavolt.com"}</p>
+              <p className="text-sm font-medium">{role === "consumer" ? "Akshay Bhatia" : "Admin User"}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{role === "consumer" ? "akshay.b@betavolt.com" : "admin@betavolt.com"}</p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {role === "consumer" && (
