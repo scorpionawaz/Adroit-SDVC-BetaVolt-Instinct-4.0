@@ -212,11 +212,33 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
   }, [toast]);
 
   useEffect(() => {
-    const custId = localStorage.getItem("instinct_customer_id") || "UID-10294";
-    customerIdRef.current = custId;
-    fetchDevices(custId);
-    
-    // Fetch live tariff
+    (async () => {
+      // Resolve stored id (auth UID or DB customer_id)
+      const stored = localStorage.getItem("instinct_customer_id");
+      if (!stored) {
+        setIsDevicesLoading(false);
+        return;
+      }
+
+      let resolved = stored;
+      try {
+        const exists = await fetch(`http://localhost:8080/customers/${encodeURIComponent(resolved)}`);
+        if (exists.status === 404) {
+          const s = await fetch(`http://localhost:8080/customers/search?q=${encodeURIComponent(resolved)}`);
+          if (s.ok) {
+            const found = await s.json();
+            if (found && found.customer_id) resolved = found.customer_id;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to resolve customer id:", e);
+      }
+
+      customerIdRef.current = resolved;
+      localStorage.setItem("instinct_customer_id", resolved);
+      fetchDevices(resolved);
+
+      // Fetch live tariff
     const fetchTariff = async () => {
       try {
         const res = await fetch("http://localhost:8080/tariff");
@@ -264,7 +286,8 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
 
     // Server update
     try {
-       const cid = customerIdRef.current || "UID-10294";
+       const cid = customerIdRef.current;
+       if (!cid) throw new Error("No customer id available");
        await fetch(`http://localhost:8080/customers/${cid}/devices/${deviceId}`, {
          method: "PUT",
          headers: { "Content-Type": "application/json" },
@@ -280,7 +303,8 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
     
     // Server
     try {
-      const cid = customerIdRef.current || "UID-10294";
+      const cid = customerIdRef.current;
+      if (!cid) throw new Error("No customer id available");
       await fetch(`http://localhost:8080/customers/${cid}/devices/${id}`, { method: "DELETE" });
     } catch(e) { console.error("Delete failed", e); }
   };
@@ -289,7 +313,11 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
     if (!newName.trim()) return;
     const w = parseInt(newWatts) || 100;
     
-    const cid = customerIdRef.current || "UID-10294";
+    const cid = customerIdRef.current;
+    if (!cid) {
+      toast({ variant: "destructive", title: "Error", description: "No customer id available." });
+      return;
+    }
     try {
       const res = await fetch(`http://localhost:8080/customers/${cid}/devices`, {
         method: "POST", headers: { "Content-Type": "application/json" },
