@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { User, Bell, Shield, Zap, Sparkles } from "lucide-react";
+import { User, Bell, Shield, Zap, Sparkles, ArrowRightCircle, ShieldCheck } from "lucide-react";
 
 export function ConsumerProfile() {
   const [darkMode, setDarkMode] = useState(false);
@@ -167,64 +167,100 @@ export function ConsumerProfile() {
           </CardContent>
         </Card>
           {/* Customer Type Switcher + Conditional UI */}
-          <Card>
+          <Card className="border-slate-200 dark:border-slate-700">
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-primary" />
-                <CardTitle>Customer Type</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-primary" />
+                  <CardTitle>Service Management</CardTitle>
+                </div>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                  customerType === "prepaid" ? "bg-emerald-500 text-white" :
+                  customerType === "solar" ? "bg-amber-500 text-white" :
+                  "bg-blue-500 text-white"
+                }`}>
+                  {customerType} Active
+                </span>
               </div>
-              <CardDescription>Set customer type: prepaid, postpaid or solar</CardDescription>
+              <CardDescription>Manage your current subscription and request service changes.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Button size="sm" variant={customerType === "prepaid" ? "default" : "outline"} onClick={() => setType("prepaid")}>Prepaid</Button>
-                <Button size="sm" variant={customerType === "postpaid" ? "default" : "outline"} onClick={() => setType("postpaid")}>Postpaid</Button>
-                <Button size="sm" variant={customerType === "solar" ? "default" : "outline"} onClick={() => setType("solar")}>Solar</Button>
+            <CardContent className="space-y-6">
+              <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                <h4 className="text-sm font-bold mb-1">Current Plan: <span className="capitalize text-primary">{customerType}</span></h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {customerType === "prepaid" && "You are currently using the pay-as-you-go service. Balance is deducted in real-time based on your usage."}
+                  {customerType === "postpaid" && "Standard monthly billing is active. You will receive an invoice at the end of each billing cycle."}
+                  {customerType === "solar" && "Solar optimization is active. Your system is feeding-in excess power to the BetaVolt grid."}
+                </p>
+                
+                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  {customerType === "prepaid" && (
+                    <div className="space-y-3">
+                      <p className="text-xs font-medium">Switching to Postpaid?</p>
+                      <Button variant="outline" size="sm" className="w-full justify-start text-xs h-9 border-dashed" onClick={() => alert("Postpaid activation request sent to BetaVolt Admin.")}>
+                        <ArrowRightCircle className="h-3.5 w-3.5 mr-2" /> Request Postpaid Activation
+                      </Button>
+                      <p className="text-[10px] text-muted-foregrounditalic">* Requires credit verification and a security deposit of ₹2,000.</p>
+                    </div>
+                  )}
+                  {customerType === "postpaid" && (
+                    <div className="space-y-3">
+                      <p className="text-xs font-medium">Switching to Prepaid?</p>
+                      <Button variant="outline" size="sm" className="w-full justify-start text-xs h-9 border-dashed" onClick={() => alert("Prepaid migration request sent. Our agent will contact you for meter re-configuration.")}>
+                        <ShieldCheck className="h-3.5 w-3.5 mr-2" /> Request Prepaid Migration
+                      </Button>
+                      <p className="text-[10px] text-muted-foreground italic">* Instant balance deduction will start after meter firmware update.</p>
+                    </div>
+                  )}
+                  {customerType === "solar" && (
+                    <div className="flex items-center gap-2 text-xs text-amber-600 font-bold">
+                      <Sparkles className="h-4 w-4" /> Solar Optimization Fully Active
+                    </div>
+                  )}
+                </div>
               </div>
 
               {customerType === "prepaid" && (
-                <div className="space-y-2">
-                  <p className="text-sm">Wallet Balance: <strong>{walletBalance ?? "—"} INR</strong></p>
+                <div className="space-y-3 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900 bg-emerald-50/20 dark:bg-emerald-900/10">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Wallet Management</Label>
+                    <p className="text-sm font-mono font-black text-emerald-600">₹{walletBalance?.toFixed(2) ?? "—"}</p>
+                  </div>
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => topUp(100)}>Top-up ₹100</Button>
-                    <Button size="sm" onClick={() => topUp(500)}>Top-up ₹500</Button>
+                    <Button size="sm" className="flex-1 bg-emerald-600 hover:bg-emerald-700 h-8 text-xs" onClick={() => topUp(100)}>+₹100</Button>
+                    <Button size="sm" className="flex-1 bg-emerald-600 hover:bg-emerald-700 h-8 text-xs" onClick={() => topUp(500)}>+₹500</Button>
                   </div>
                 </div>
               )}
 
               {customerType === "solar" && (
-                <div className="space-y-2">
-                  <p className="text-sm">Solar Input / Output Records</p>
+                <div className="space-y-4 p-4 rounded-xl border border-amber-100 dark:border-amber-900 bg-amber-50/20 dark:bg-amber-900/10">
+                  <Label className="text-sm font-bold text-amber-700 dark:text-amber-400">Solar Record Management</Label>
                   <div className="grid grid-cols-2 gap-2">
-                    <input placeholder="Input kWh" id="in-kwh" className="input" />
-                    <input placeholder="Output kWh" id="out-kwh" className="input" />
+                    <Input placeholder="Input kWh" id="in-kwh" className="h-8 text-xs bg-white/50 dark:bg-slate-900/50" />
+                    <Input placeholder="Output kWh" id="out-kwh" className="h-8 text-xs bg-white/50 dark:bg-slate-900/50" />
                   </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => {
-                      const inEl = document.getElementById("in-kwh") as HTMLInputElement | null;
-                      const outEl = document.getElementById("out-kwh") as HTMLInputElement | null;
-                      const inV = Number(inEl?.value || 0);
-                      const outV = Number(outEl?.value || 0);
-                      addSolarRecord(inV, outV);
-                      if (inEl) inEl.value = "";
-                      if (outEl) outEl.value = "";
-                    }}>Add Record</Button>
-                  </div>
-                  <div className="space-y-1 text-xs">
-                    {solarRecords.length === 0 ? <p className="text-muted-foreground">No records yet.</p> : (
+                  <Button size="sm" className="w-full bg-amber-600 hover:bg-amber-700 h-8 text-xs" onClick={() => {
+                    const inEl = document.getElementById("in-kwh") as HTMLInputElement | null;
+                    const outEl = document.getElementById("out-kwh") as HTMLInputElement | null;
+                    const inV = Number(inEl?.value || 0);
+                    const outV = Number(outEl?.value || 0);
+                    addSolarRecord(inV, outV);
+                    if (inEl) inEl.value = "";
+                    if (outEl) outEl.value = "";
+                  }}>Log Daily Production</Button>
+                  
+                  <div className="space-y-1.5 max-h-[150px] overflow-y-auto pr-1">
+                    {solarRecords.length === 0 ? <p className="text-[10px] text-muted-foreground">No production logs available.</p> : (
                       solarRecords.map((r, i) => (
-                        <div key={i} className="border rounded p-2">
-                          <div>Input: {r.input_kwh} kWh — Output: {r.output_kwh} kWh</div>
-                          <div className="text-muted-foreground text-xs">{new Date(r.timestamp).toLocaleString()}</div>
+                        <div key={i} className="flex items-center justify-between text-[10px] p-2 bg-white/40 dark:bg-slate-900/30 rounded border border-amber-100/50 dark:border-amber-900/30">
+                          <span className="font-medium">{new Date(r.timestamp).toLocaleDateString()}</span>
+                          <span className="text-amber-700 dark:text-amber-400 font-bold">{r.output_kwh} Out / {r.input_kwh} In</span>
                         </div>
                       ))
                     )}
                   </div>
                 </div>
-              )}
-
-              {customerType === "postpaid" && (
-                <div className="text-sm">Postpaid customers use the regular bill view in Billing page.</div>
               )}
             </CardContent>
           </Card>

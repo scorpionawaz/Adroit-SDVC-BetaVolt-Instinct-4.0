@@ -157,6 +157,7 @@ export function ConsumerBilling() {
   const [rechargeAmount, setRechargeAmount] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [txns, setTxns] = useState<any[]>([]);
+  const [bills, setBills] = useState<any[]>([]);
   const [consumerId, setConsumerId] = useState<string | null>(null);
 
   const fetchWallet = useCallback(async (cid: string) => {
@@ -179,13 +180,26 @@ export function ConsumerBilling() {
     }
   }, []);
 
+  const fetchBills = useCallback(async (cid: string) => {
+    try {
+      const res = await fetch(`http://localhost:8080/customers/${cid}/bills`);
+      if (res.ok) {
+        const j = await res.json();
+        setBills(j || []);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
   useEffect(() => {
     const id = localStorage.getItem("instinct_customer_id");
     if (id) {
       setConsumerId(id);
       fetchWallet(id);
+      fetchBills(id);
     }
-  }, [fetchWallet]);
+  }, [fetchWallet, fetchBills]);
 
   const handleRecharge = async () => {
     const amt = Number(rechargeAmount);
@@ -328,31 +342,32 @@ export function ConsumerBilling() {
             <CardDescription>View and download detailed monthly bills.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {[
-              { month: "January 2026", amount: "₹1,819.97", units: "242 kWh" },
-              { month: "December 2025", amount: "₹1,620.00", units: "220 kWh" },
-              { month: "November 2025", amount: "₹1,390.00", units: "188 kWh" },
-            ].map((bill) => (
-              <div key={bill.month} className="flex items-center justify-between border rounded-lg p-3">
-                <div>
-                  <p className="text-sm font-medium">{bill.month}</p>
-                  <p className="text-xs text-muted-foreground">{bill.units} · {bill.amount}</p>
+            {bills.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No bills found.</p>
+            ) : (
+              bills.map((bill) => (
+                <div key={bill._id} className="flex items-center justify-between border rounded-lg p-3">
+                  <div>
+                    <p className="text-sm font-medium">{bill.month}</p>
+                    <p className="text-xs text-muted-foreground">{bill.usage_kwh} kWh · {bill.amount}</p>
+                    <p className={`text-[10px] font-bold mt-1 ${bill.status === "Paid" ? "text-emerald-600" : "text-red-500"}`}>{bill.status}</p>
+                  </div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Download className="h-3.5 w-3.5 mr-1" /> View
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Electricity Bill — {bill.month}</DialogTitle>
+                      </DialogHeader>
+                      <BillDetail />
+                    </DialogContent>
+                  </Dialog>
                 </div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Download className="h-3.5 w-3.5 mr-1" /> View
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Electricity Bill — {bill.month}</DialogTitle>
-                    </DialogHeader>
-                    <BillDetail />
-                  </DialogContent>
-                </Dialog>
-              </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
       </div>

@@ -445,54 +445,63 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
   return (
     <TooltipProvider>
       <div className="max-w-[1400px] mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Home Monitor</h2>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
+              customerType === "prepaid" ? "bg-emerald-500 text-white" :
+              customerType === "solar" ? "bg-amber-500 text-white" :
+              "bg-blue-500 text-white"
+            }`}>
+              {customerType} Active
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Live System Status
+          </div>
+        </div>
 
         {/* ── ROW 1: Stat Cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Usage */}
+        <div className={cn("grid gap-3", customerType === "solar" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-3")}>
+          
+          {/* Usage / Import */}
           <Card className="shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-shadow duration-300 border-slate-200 dark:border-slate-700 dark:bg-slate-800">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-4">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Usage Today</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{customerType === "solar" ? "Current Usage (Import)" : "Usage Today"}</p>
               <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
                 <Zap className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
               </div>
             </CardHeader>
             <CardContent className="px-4 pb-3">
               <p className="text-xl font-black text-slate-900 dark:text-white font-mono tabular-nums">{totalUsageKWh.toFixed(2)} <span className="text-xs font-normal text-slate-500">kWh</span></p>
-              <p className="text-[10px] mt-0.5 text-slate-500">≈ ₹{estimatedCost.toFixed(0)}</p>
+              <p className="text-[10px] mt-0.5 text-slate-500">
+                {customerType === "solar" ? "Total grid power consumed" : `≈ ₹${estimatedCost.toFixed(0)}`}
+              </p>
             </CardContent>
           </Card>
 
-          {/* Tariff — COLOR CODED */}
-          <Card className={cn("shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all duration-300 border-2", tariffBg)}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-4">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                Live Tariff
-                <span className="relative flex h-2 w-2">
-                  <span className={cn("animate-ping absolute h-full w-full rounded-full opacity-75", isAlertLevel ? "bg-red-400" : "bg-emerald-400")} />
-                  <span className={cn("relative rounded-full h-2 w-2", isAlertLevel ? "bg-red-500" : "bg-emerald-500")} />
-                </span>
-              </p>
-              <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", isAlertLevel ? "bg-red-100 dark:bg-red-900" : "bg-orange-100 dark:bg-orange-900")}>
-                {isHighTariff ? <Sun className={cn("h-3.5 w-3.5", isAlertLevel ? "text-red-600" : "text-orange-600")} /> : <Moon className="h-3.5 w-3.5 text-slate-500" />}
-              </div>
-            </CardHeader>
-            <CardContent className="px-4 pb-3">
-              <p className={cn("text-xl font-black font-mono tabular-nums transition-colors duration-500", tariffColor)}>
-                ₹{liveTariff.toFixed(2)}<span className="text-xs font-normal text-slate-500">/kWh</span>
-              </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                {isAlertLevel && <Badge variant="destructive" className="text-[9px] h-4 animate-pulse">HIGH ALERT</Badge>}
-                <p className={cn("text-[10px] font-bold text-slate-500")}>
-                  {tariffLastUpdated ? `Updated: ${tariffLastUpdated}` : isHighTariff ? "Peak 9AM–9PM" : "Off-Peak"}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-
-          {/* Predicted / Wallet / Solar — DYNAMIC */}
-          <Card className="bg-slate-900 border-slate-800 text-white shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-shadow duration-300">
-            {customerType === "prepaid" ? (
+          {/* Balance / Export / Predicted */}
+          <Card className={cn(
+            "shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-shadow duration-300 border-slate-200 dark:border-slate-700",
+            customerType === "solar" ? "dark:bg-slate-800 border-l-4 border-l-amber-500" : "bg-slate-900 border-slate-800 text-white"
+          )}>
+            {customerType === "solar" ? (
+              <>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-4">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Net Generation (Export)</p>
+                  <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900 flex items-center justify-center">
+                    <Sun className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                </CardHeader>
+                <CardContent className="px-4 pb-3">
+                  <p className="text-xl font-black font-mono text-amber-500 tabular-nums">
+                    {(solarRecords.reduce((acc, r) => acc + r.output_kwh, 0)).toFixed(1)} <span className="text-xs font-normal text-slate-400">kWh</span>
+                  </p>
+                  <p className="text-[10px] mt-0.5 text-slate-500">Total solar energy produced</p>
+                </CardContent>
+              </>
+            ) : customerType === "prepaid" ? (
               <>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-4">
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Wallet Balance</p>
@@ -504,22 +513,7 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
                   <p className="text-xl font-black font-mono text-emerald-400 tabular-nums">
                     ₹{walletBalance?.toLocaleString() ?? "0"}
                   </p>
-                  <p className="text-[10px] mt-0.5 text-slate-500">Prepaid Account</p>
-                </CardContent>
-              </>
-            ) : customerType === "solar" ? (
-              <>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-4">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Net Generation</p>
-                  <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
-                    <Sun className="h-3.5 w-3.5 text-amber-400" />
-                  </div>
-                </CardHeader>
-                <CardContent className="px-4 pb-3">
-                  <p className="text-xl font-black font-mono text-amber-400 tabular-nums">
-                    {(solarRecords.reduce((acc, r) => acc + (r.output_kwh - r.input_kwh), 0)).toFixed(1)} <span className="text-xs font-normal text-slate-400">kWh</span>
-                  </p>
-                  <p className="text-[10px] mt-0.5 text-slate-500">Solar Feed-in</p>
+                  <p className="text-[10px] mt-0.5 text-slate-500">Available Funds</p>
                 </CardContent>
               </>
             ) : (
@@ -537,6 +531,35 @@ export function DashboardClient({ onAgentModeChange }: { onAgentModeChange?: (ac
               </>
             )}
           </Card>
+
+          {/* Tariff (Hidden for Solar) */}
+          {customerType !== "solar" && (
+            <Card className={cn("shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all duration-300 border-2", tariffBg)}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-4">
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  Live Tariff
+                  <span className="relative flex h-2 w-2">
+                    <span className={cn("animate-ping absolute h-full w-full rounded-full opacity-75", isAlertLevel ? "bg-red-400" : "bg-emerald-400")} />
+                    <span className={cn("relative rounded-full h-2 w-2", isAlertLevel ? "bg-red-500" : "bg-emerald-500")} />
+                  </span>
+                </p>
+                <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", isAlertLevel ? "bg-red-100 dark:bg-red-900" : "bg-orange-100 dark:bg-orange-900")}>
+                  {isHighTariff ? <Sun className={cn("h-3.5 w-3.5", isAlertLevel ? "text-red-600" : "text-orange-600")} /> : <Moon className="h-3.5 w-3.5 text-slate-500" />}
+                </div>
+              </CardHeader>
+              <CardContent className="px-4 pb-3">
+                <p className={cn("text-xl font-black font-mono tabular-nums transition-colors duration-500", tariffColor)}>
+                  ₹{liveTariff.toFixed(2)}<span className="text-xs font-normal text-slate-500">/kWh</span>
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  {isAlertLevel && <Badge variant="destructive" className="text-[9px] h-4 animate-pulse">HIGH ALERT</Badge>}
+                  <p className={cn("text-[10px] font-bold text-slate-500")}>
+                    {tariffLastUpdated ? `Updated: ${tariffLastUpdated}` : isHighTariff ? "Peak 9AM–9PM" : "Off-Peak"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* ── ROW 2: Devices ── */}
