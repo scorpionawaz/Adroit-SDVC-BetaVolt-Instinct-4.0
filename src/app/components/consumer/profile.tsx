@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { User, Bell, Shield, Zap, Sparkles, ArrowRightCircle, ShieldCheck } from "lucide-react";
 
 export function ConsumerProfile() {
@@ -194,6 +195,14 @@ export function ConsumerProfile() {
                 </p>
                 
                 <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Instant Plan Switch (Demo)</p>
+                  <div className="flex gap-2 mb-6">
+                    <Button size="sm" variant={customerType === "prepaid" ? "default" : "outline"} className="flex-1 text-xs h-8" onClick={() => setType("prepaid")}>Prepaid</Button>
+                    <Button size="sm" variant={customerType === "postpaid" ? "default" : "outline"} className="flex-1 text-xs h-8" onClick={() => setType("postpaid")}>Postpaid</Button>
+                    <Button size="sm" variant={customerType === "solar" ? "default" : "outline"} className="flex-1 text-xs h-8" onClick={() => setType("solar")}>Solar</Button>
+                  </div>
+
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Service Requests</p>
                   {customerType === "prepaid" && (
                     <div className="space-y-3">
                       <p className="text-xs font-medium">Switching to Postpaid?</p>

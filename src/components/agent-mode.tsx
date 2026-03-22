@@ -158,7 +158,7 @@ export function AgentMode({ isOpen, onClose }: AgentModeProps) {
       <div
         className={cn(
           "fixed inset-0 z-[9990]",
-          "bg-white dark:bg-[#0a0f1a]",
+          "bg-[#0a0f1a]",
           "transition-opacity duration-700 ease-out",
           p >= 1 ? "opacity-100" : "opacity-0 pointer-events-none",
         )}
@@ -167,7 +167,7 @@ export function AgentMode({ isOpen, onClose }: AgentModeProps) {
       {/* ── Content stage ── */}
       <div
         className={cn(
-          "fixed inset-0 z-[9991] flex flex-col relative",
+          "fixed inset-0 z-[9991] flex flex-col",
           p >= 1 ? "pointer-events-auto" : "pointer-events-none",
         )}
       >
@@ -182,7 +182,7 @@ export function AgentMode({ isOpen, onClose }: AgentModeProps) {
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="flex-1 h-24 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 animate-pulse"
+              className="flex-1 h-24 rounded-xl border-2 border-slate-700 bg-slate-800 animate-pulse"
             />
           ))}
         </div>
@@ -190,8 +190,8 @@ export function AgentMode({ isOpen, onClose }: AgentModeProps) {
         {/* ─ Ghost device grid (fades out in stages) ─ */}
         <div
           className={cn(
-            "flex-1 mx-8 mb-8 rounded-2xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden",
-            "bg-white dark:bg-slate-900",
+            "flex-1 mx-8 mb-8 rounded-2xl border-2 border-slate-700 overflow-hidden",
+            "bg-slate-900",
             "transition-all duration-700",
           )}
         >
@@ -206,19 +206,19 @@ export function AgentMode({ isOpen, onClose }: AgentModeProps) {
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="h-36 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-3 flex flex-col gap-2"
+                className="h-36 rounded-xl border-2 border-slate-700 bg-slate-800 p-3 flex flex-col gap-2"
                 style={{
                   opacity: cardOpacity(i),
                   transform: `scale(${cardScale(i)})`,
                   transition: `opacity 500ms ease-out ${cardDelay(i)}ms, transform 500ms ease-out ${cardDelay(i)}ms`,
                 }}
               >
-                <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700" />
-                <div className="w-16 h-2 rounded bg-slate-200 dark:bg-slate-700" />
-                <div className="w-10 h-2 rounded bg-slate-100 dark:bg-slate-800" />
+                <div className="w-8 h-8 rounded-lg bg-slate-700" />
+                <div className="w-16 h-2 rounded bg-slate-700" />
+                <div className="w-10 h-2 rounded bg-slate-800" />
                 <div className="mt-auto flex items-center justify-between">
-                  <div className="w-12 h-5 rounded-full bg-slate-200 dark:bg-slate-700" />
-                  <div className="w-8 h-4 rounded bg-slate-200 dark:bg-slate-700" />
+                  <div className="w-12 h-5 rounded-full bg-slate-700" />
+                  <div className="w-8 h-4 rounded bg-slate-700" />
                 </div>
               </div>
             ))}
@@ -282,19 +282,19 @@ export function AgentMode({ isOpen, onClose }: AgentModeProps) {
                 className="flex flex-col items-center gap-1.5 pointer-events-auto"
                 style={{ animation: "agentFadeIn 0.5s ease both" }}
               >
-                <p className="text-slate-800 dark:text-slate-100 text-xl font-bold tracking-wide">
+                <p className="text-slate-100 text-xl font-bold tracking-wide">
                   BetaVolt Agent
                 </p>
-                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-2 text-sm text-slate-400">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
                     <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
                   </span>
                   Speaking…
                 </div>
-                <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                <p className="mt-1 text-xs text-slate-500">
                   Press{" "}
-                  <kbd className="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded px-1.5 py-0.5 font-mono text-[11px]">
+                  <kbd className="bg-slate-800 border-slate-700 border rounded px-1.5 py-0.5 font-mono text-[11px]">
                     ESC
                   </kbd>{" "}
                   to exit Agent Mode

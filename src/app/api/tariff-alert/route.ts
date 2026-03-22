@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import WebSocket from "ws";
 
-const WS_URL = "ws://10.10.11.89:8080/lovelocalai/";
+const WS_URL = "ws://localhost:8080/lovelocalai/";
 
 interface ActiveDevice {
   id: string;

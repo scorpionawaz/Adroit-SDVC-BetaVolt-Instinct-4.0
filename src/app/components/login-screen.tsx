@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Zap, ShieldCheck, Mail, Lock, Loader2 } from "lucide-react";
+import { Zap, ShieldCheck, Mail, Lock, Loader2, ChevronLeft } from "lucide-react";
 
 interface LoginScreenProps {
   onLogin: (role: Role) => void;
+  onBack?: () => void;
 }
 
-export function LoginScreen({ onLogin }: LoginScreenProps) {
+export function LoginScreen({ onLogin, onBack }: LoginScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +53,18 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
       <Card className="w-full max-w-md shadow-2xl border-none ring-1 ring-border/50 relative z-10 backdrop-blur-xl bg-card/80 p-0 overflow-hidden">
         <form onSubmit={handleLogin}>
-          <CardHeader className="space-y-3 text-center pb-6 pt-10">
+          <CardHeader className="space-y-3 text-center pb-6 pt-10 relative">
+            {onBack && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute left-4 top-4 hover:bg-muted text-muted-foreground"
+                onClick={onBack}
+                type="button"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+            )}
             <div className="mx-auto bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mb-2 ring-1 ring-primary/20">
               <Zap className="h-8 w-8 text-primary" />
             </div>

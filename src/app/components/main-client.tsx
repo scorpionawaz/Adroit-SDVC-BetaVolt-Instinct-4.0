@@ -3,14 +3,17 @@
 import { useState, useEffect } from "react";
 import { LoginScreen } from "./login-screen";
 import { AppShell } from "./app-shell";
+import { LandingPage } from "./landing-page";
 
 export type Role = "consumer" | "admin" | null;
+export type ViewState = "landing" | "login" | "app";
 
 const STORAGE_KEY = "instinct_user_role";
 
 export function MainClient() {
   const [role, setRole] = useState<Role>(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [view, setView] = useState<ViewState>("landing");
 
   // On mount, read persisted role from localStorage
   useEffect(() => {
@@ -22,6 +25,7 @@ export function MainClient() {
     }
     if (stored === "consumer") {
       setRole("consumer");
+      setView("app");
     }
     setIsHydrated(true);
   }, []);
@@ -34,11 +38,13 @@ export function MainClient() {
     }
     localStorage.setItem(STORAGE_KEY, newRole ?? "");
     setRole(newRole);
+    setView("app");
   };
 
   const handleLogout = () => {
     localStorage.removeItem(STORAGE_KEY);
     setRole(null);
+    setView("landing");
   };
 
   // Don't flash login screen while checking localStorage
@@ -53,8 +59,12 @@ export function MainClient() {
     );
   }
 
-  if (!role) {
-    return <LoginScreen onLogin={handleLogin} />;
+  if (view === "landing" && !role) {
+    return <LandingPage onLoginClick={() => setView("login")} />;
+  }
+
+  if (view === "login" && !role) {
+    return <LoginScreen onLogin={handleLogin} onBack={() => setView("landing")} />;
   }
 
   return <AppShell role={role} onLogout={handleLogout} />;

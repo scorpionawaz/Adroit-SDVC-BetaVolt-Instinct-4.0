@@ -17,9 +17,43 @@ type SupportView = "call";
 interface ChatbotWidgetProps {
   onRegisterWSSend?: (sendFn: (msg: string) => boolean) => void;
   onDeviceSignal?: (deviceId: string, action: "turn_on" | "turn_off") => void;
+  isAgentModeOpen?: boolean;
+  onCloseAgentMode?: () => void;
 }
 
-export function ChatbotWidget({ onRegisterWSSend, onDeviceSignal }: ChatbotWidgetProps) {
+// ── Wave bars (react to audio level) ─────────────────────
+function WaveBar({ audioLevel, i }: { audioLevel: number; i: number }) {
+  const base = 6;
+  const peak = Math.sin((Date.now() / 200 + i * 0.7)) * audioLevel * 28 + base;
+  return (
+    <div
+      className="w-[3px] rounded-full bg-white/90"
+      style={{ height: `${Math.max(base, peak)}px`, transition: "height 90ms ease-out" }}
+    />
+  );
+}
+
+// ── Pulsing orbit ring ────────────────────────────────────
+function Ring({ size, delay, audioLevel }: { size: number; delay: number; audioLevel: number }) {
+  const boost = 1 + audioLevel * 0.18;
+  return (
+    <span
+      className="absolute rounded-full border border-emerald-400/40 pointer-events-none"
+      style={{
+        width:  size * boost,
+        height: size * boost,
+        top:    "50%",
+        left:   "50%",
+        transform: "translate(-50%,-50%)",
+        animation: `agentPing ${2 + delay}s cubic-bezier(0,0,0.2,1) infinite`,
+        animationDelay: `${delay * 0.5}s`,
+        transition: "all 90ms ease-out",
+      }}
+    />
+  );
+}
+
+export function ChatbotWidget({ onRegisterWSSend, onDeviceSignal, isAgentModeOpen, onCloseAgentMode }: ChatbotWidgetProps) {
   // --- UI STATE ---
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [view, setView] = useState<SupportView>("call");
@@ -370,9 +404,155 @@ export function ChatbotWidget({ onRegisterWSSend, onDeviceSignal }: ChatbotWidge
     if (view === "call") callMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, view]);
 
+  // Handle Agent Mode toggle from props
+  useEffect(() => {
+    if (isAgentModeOpen) {
+      if (webSocket.current?.readyState !== WebSocket.OPEN) {
+        startCall();
+      }
+    } else {
+      // Don't stop call automatically if they close agent mode but might have Chatbot open?
+      // Actually, exiting Agent Mode should exit the call.
+      if (webSocket.current?.readyState === WebSocket.OPEN && !isChatOpen) {
+        stopCall();
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAgentModeOpen]);
+
+  // Audio visualizer state for Agent Mode
+  const [visualAudio, setVisualAudio] = useState(0);
+  const visualTicker = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (isAgentModeOpen && isAiSpeaking) {
+      visualTicker.current = setInterval(() => {
+        setVisualAudio(Math.random() > 0.3 ? Math.random() * 0.85 + 0.1 : Math.random() * 0.05);
+      }, 110);
+    } else {
+      if (visualTicker.current) clearInterval(visualTicker.current);
+      setVisualAudio(0);
+    }
+    return () => { if (visualTicker.current) clearInterval(visualTicker.current); };
+  }, [isAgentModeOpen, isAiSpeaking]);
+
+
+  // RENDER AGENT MODE (FULL SCREEN)
+  if (isAgentModeOpen) {
+    return (
+      <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center p-6 pointer-events-auto">
+        {/* Backdrop (Light mode aware) */}
+        <div className="absolute inset-0 bg-white/80 dark:bg-[#0a0f1a]/80 backdrop-blur-md transition-opacity duration-700" />
+
+        {/* Content */}
+        <div className="relative flex flex-col items-center justify-center gap-6 z-10 w-full h-full animate-in fade-in zoom-in-95 duration-500">
+          
+          <video ref={videoRef} playsInline muted style={{ display: "none" }} />
+          <canvas ref={canvasRef} style={{ display: "none" }} />
+
+          {/* The expanding circle */}
+          <div
+            className="relative flex items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-700"
+            style={{
+              width: 220,
+              height: 220,
+              boxShadow: `0 0 ${50 + visualAudio * 60}px ${10 + visualAudio * 20}px rgba(52,211,153,0.35)`,
+              transition: "box-shadow 90ms ease-out",
+            }}
+          >
+            {/* Orbit rings */}
+            <Ring size={290} delay={0}   audioLevel={visualAudio} />
+            <Ring size={370} delay={0.7} audioLevel={visualAudio} />
+            <Ring size={460} delay={1.4} audioLevel={visualAudio} />
+
+            {/* Inner face */}
+            <div className="flex flex-col items-center gap-2 z-10">
+              <div 
+                className="text-white drop-shadow flex items-center justify-center text-6xl"
+                style={{ transform: `scale(${1 + visualAudio * 0.12})`, transition: "transform 90ms ease-out" }}
+              >
+                🤖
+              </div>
+
+              {/* Audio wave bars */}
+              <div className="flex items-center gap-[3px] mt-2" style={{ height: 36 }}>
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <WaveBar key={i} audioLevel={visualAudio} i={i} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Label */}
+          <div className="flex flex-col items-center gap-1.5 mt-10">
+            <h2 className="text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-wide">
+              BetaVolt Agent
+            </h2>
+            <div className="flex items-center gap-2 text-base text-slate-600 dark:text-slate-400 font-medium">
+              {connectionStatus === "Connected" ? (
+                <>
+                  <span className="relative flex h-2.5 w-2.5">
+                    {isAiSpeaking && <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />}
+                    <span className="relative rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                  </span>
+                  {isAiSpeaking ? "Speaking…" : "Listening…"}
+                </>
+              ) : (
+                connectionStatus
+              )}
+            </div>
+          </div>
+          
+          {/* Controls */}
+          <div className="mt-8 flex items-center gap-4">
+            {connectionStatus === "Disconnected" || connectionStatus === "Error" || connectionStatus === "Failed" || connectionStatus === "Media Context Error" ? (
+              <button
+                onClick={startCall}
+                className="w-16 h-16 rounded-full bg-emerald-500 hover:bg-emerald-600 border-none cursor-pointer flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+                title="Start Call"
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={stopCall}
+                className="w-16 h-16 rounded-full bg-destructive border-none cursor-pointer flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+                title="End Call"
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          <button
+            onClick={() => {
+              if (onCloseAgentMode) onCloseAgentMode();
+            }}
+            className="absolute top-6 right-6 flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 hover:bg-red-600 backdrop-blur-sm text-white text-sm font-semibold border border-slate-700 transition-all shadow-lg z-20"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Exit Agent Mode
+          </button>
+        </div>
+        
+        <style>{`
+          @keyframes agentPing {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            5% { opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
   return (
     <>
-      {/* FLOATING BUTTON */}
+      {/* FLOATING BUTTON (Only if agent mode is NOT open) */}
       {!isChatOpen && (
         <button
           onClick={openSupport}
@@ -478,19 +658,29 @@ export function ChatbotWidget({ onRegisterWSSend, onDeviceSignal }: ChatbotWidge
                     </button>
                   </div>
 
-                  {/* End Call */}
+                  {/* Call Controls */}
                   <div className="flex justify-center mt-2">
-                    <button
-                      onClick={() => {
-                        stopCall();
-                        setView("call"); // Not switching view anymore, just stays in call (ended)
-                      }}
-                      className="w-14 h-14 rounded-full bg-destructive border-none cursor-pointer flex items-center justify-center shadow-md hover:scale-105 transition-transform"
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                        <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
-                      </svg>
-                    </button>
+                    {connectionStatus === "Disconnected" || connectionStatus === "Error" || connectionStatus === "Failed" || connectionStatus === "Media Context Error" ? (
+                      <button
+                        onClick={startCall}
+                        className="w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-600 border-none cursor-pointer flex items-center justify-center shadow-md hover:scale-105 transition-transform"
+                        title="Start Call"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={stopCall}
+                        className="w-14 h-14 rounded-full bg-destructive border-none cursor-pointer flex items-center justify-center shadow-md hover:scale-105 transition-transform"
+                        title="End Call"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                          <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

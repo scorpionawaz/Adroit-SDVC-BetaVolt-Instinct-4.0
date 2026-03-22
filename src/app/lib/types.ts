@@ -17,4 +17,4 @@ export type Tariff = {
 };
 
 // Threshold above which the AI agent auto-alerts (₹/kWh)
-export const TARIFF_ALERT_THRESHOLD = 9.5;
+export const TARIFF_ALERT_THRESHOLD = 25;

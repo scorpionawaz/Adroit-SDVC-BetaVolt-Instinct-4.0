@@ -300,7 +300,7 @@ function AgentGreetingCard({ onConnect, messages, inputText, setInputText, isTyp
   sendMessage: (text: string) => void;
   bottomRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const WS_URL = "ws://10.10.12.174:8080/BetaVoltSupport/";
+  const WS_URL = "ws://localhost:8080/BetaVoltSupport/";
   const USER_AUDIO_SAMPLE_RATE = 16000;
   const AI_SAMPLE_RATE = 24000;
 
@@ -448,6 +448,7 @@ function AgentGreetingCard({ onConnect, messages, inputText, setInputText, isTyp
     setTimeout(() => {
       setPhase("chat");
       if (mode === "chat") onConnect();
+      startCall();
     }, 2500);
   };
 
