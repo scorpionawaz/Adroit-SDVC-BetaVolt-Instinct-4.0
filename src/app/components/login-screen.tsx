@@ -28,7 +28,7 @@ export function LoginScreen({ onLogin, onBack }: LoginScreenProps) {
       if (email.toLowerCase().includes("admin")) {
         onLogin("admin");
       } else {
-        localStorage.setItem("instinct_customer_id", "1002");
+        localStorage.setItem("instinct_customer_id", "1004");
         onLogin("consumer");
       }
       setIsLoading(false);

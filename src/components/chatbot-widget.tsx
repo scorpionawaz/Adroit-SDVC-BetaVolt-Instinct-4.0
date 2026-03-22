@@ -269,7 +269,8 @@ export function ChatbotWidget({ onRegisterWSSend, onDeviceSignal, isAgentModeOpe
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       aiAudioContext.current = new AudioCtx({ sampleRate: AI_SAMPLE_RATE });
 
-      webSocket.current = new WebSocket(WS_URL);
+      const customerId = localStorage.getItem("instinct_customer_id") || "cust-123";
+      webSocket.current = new WebSocket(`${WS_URL}?customer_id=${encodeURIComponent(customerId)}`);
 
       webSocket.current.onopen = () => {
         if (ringingInterval.current) clearInterval(ringingInterval.current);
@@ -322,7 +323,34 @@ export function ChatbotWidget({ onRegisterWSSend, onDeviceSignal, isAgentModeOpe
             playAudioChunk(msg.data);
           } else if (msg.type === "text") {
             console.log("[chatbot-ws] Text from AI:", msg.data);
-            setMessages((prev) => [...prev, { text: msg.data, isUser: false }]);
+            setMessages((prev) => {
+              if (prev.length > 0 && !prev[prev.length - 1].isUser) {
+                // Append to the existing AI message bubble
+                const updated = [...prev];
+                updated[updated.length - 1] = { 
+                  ...updated[updated.length - 1], 
+                  text: updated[updated.length - 1].text + msg.data 
+                };
+                return updated;
+              }
+              // Start a new AI message bubble
+              return [...prev, { text: msg.data, isUser: false }];
+            });
+          } else if (msg.type === "usertext") {
+            console.log("[chatbot-ws] Transcribed Text from USER:", msg.data);
+            setMessages((prev) => {
+              if (prev.length > 0 && prev[prev.length - 1].isUser) {
+                // Append to the existing User message bubble
+                const updated = [...prev];
+                updated[updated.length - 1] = { 
+                  ...updated[updated.length - 1], 
+                  text: updated[updated.length - 1].text + " " + msg.data 
+                };
+                return updated;
+              }
+              // Start a new User message bubble
+              return [...prev, { text: msg.data, isUser: true }];
+            });
           } else if (msg.type === "device_signal") {
             const { device_id, device_name, action, reason } = msg.data;
             console.log(`[chatbot-ws] Device signal — ${action} "${device_name}" (${device_id}). Reason: ${reason}`);
