@@ -88,7 +88,7 @@ export function LandingPage({ onLoginClick }: LandingPageProps) {
                   variant="outline"
                   className="w-full sm:w-auto h-14 px-8 rounded-full text-lg border-slate-700 bg-slate-900/50 hover:bg-slate-800 text-slate-300 hover:text-white transition-all hover:scale-105 hover:border-indigo-500/50"
                 >
-                  <a href="https://drive.google.com/file/d/1PcG0WcCJ5i0Kszxn5N_QtN4WbV4KDhhM/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+                  <a href="https://drive.google.com/file/d/13rznm-kgHq86Z4rpD4jwFV_QIe-Gsdz-/view?usp=sharing" target="_blank" rel="noopener noreferrer">
                     <Play className="mr-2 h-5 w-5 text-indigo-400" /> Watch Demo
                   </a>
                 </Button>
